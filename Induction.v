@@ -158,18 +158,46 @@ Proof.
 Theorem mult_0_r : forall n:nat,
   n * 0 = 0.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  induction n as [|n' IHn'].
+  - simpl. reflexivity.
+  - simpl. rewrite -> IHn'. reflexivity. Qed.
 
 Theorem plus_n_Sm : forall n m : nat,
   S (n + m) = n + (S m).
 Proof.
-  (* FILL IN HERE *) Admitted.
-
+  induction n as [| n' IHn'].
+  - reflexivity.
+  - induction m as [|m' IHm'].
+    +
+      simpl.
+      rewrite <- IHn'.
+      reflexivity.
+    +
+      rewrite <- IHm'.
+      simpl.
+      rewrite -> IHn'.
+      rewrite -> IHn'.
+      reflexivity.
+  Qed.
 
 Theorem plus_comm : forall n m : nat,
   n + m = m + n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  induction m as [|m' IHm'].
+  -
+    rewrite <- plus_n_O.
+    rewrite -> plus_O_n.
+    reflexivity.
+  - induction n as [|n' IHn'].
+    +
+      rewrite <- plus_n_O.
+      rewrite -> plus_O_n.
+      reflexivity.
+    +
+      rewrite <- plus_n_Sm.
+      rewrite -> IHm'.
+      reflexivity.
+  Qed.
 
 Theorem plus_assoc : forall n m p : nat,
   n + (m + p) = (n + m) + p.
@@ -605,5 +633,3 @@ Definition manual_grade_for_binary_commute : option (prod nat string) := None.
 (* Do not modify the following line: *)
 Definition manual_grade_for_binary_inverse : option (prod nat string) := None.
 (** [] *)
-
-
