@@ -167,43 +167,43 @@ Theorem plus_n_Sm : forall n m : nat,
 Proof.
   induction n as [| n' IHn'].
   - reflexivity.
-  - induction m as [|m' IHm'].
-    +
-      simpl.
-      rewrite <- IHn'.
-      reflexivity.
-    +
-      rewrite <- IHm'.
-      simpl.
-      rewrite -> IHn'.
-      rewrite -> IHn'.
-      reflexivity.
-  Qed.
+  -
+    simpl.
+    intros m.
+    rewrite -> IHn'.
+    reflexivity.
 
 Theorem plus_comm : forall n m : nat,
   n + m = m + n.
 Proof.
   induction m as [|m' IHm'].
   -
-    rewrite <- plus_n_O.
-    rewrite -> plus_O_n.
+    rewrite <- plus_n_O. (* n = n + 0 *)
+    rewrite -> plus_O_n. (* 0 + n = n *)
     reflexivity.
-  - induction n as [|n' IHn'].
-    +
-      rewrite <- plus_n_O.
-      rewrite -> plus_O_n.
-      reflexivity.
-    +
-      rewrite <- plus_n_Sm.
-      rewrite -> IHm'.
-      reflexivity.
+  -
+    rewrite <- plus_n_Sm. (* S (n + m) = n + (S m) *)
+    simpl.
+    rewrite -> IHm'.
+    reflexivity.
   Qed.
 
 Theorem plus_assoc : forall n m p : nat,
   n + (m + p) = (n + m) + p.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros n m p.
+  induction m as [|m' IHm'].
+  -
+    rewrite <- plus_n_O. (* n = n + 0 *)
+    reflexivity.
+  -
+    simpl.
+    rewrite <- plus_n_Sm. (* S (n + m) = n + (S m) *)
+    rewrite -> IHm'.
+    rewrite <- plus_n_Sm.
+    simpl.
+    reflexivity.
+  Qed.
 
 (** **** Exercise: 2 stars (double_plus)  *)
 (** Consider the following function, which doubles its argument: *)
@@ -218,8 +218,15 @@ Fixpoint double (n:nat) :=
 
 Lemma double_plus : forall n, double n = n + n .
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  induction n as [|n' IHn'].
+  - reflexivity.
+  -
+    simpl.
+    rewrite -> IHn'.
+    rewrite <- plus_Sn_m.
+    rewrite -> plus_comm.
+    reflexivity.
+  Qed.
 
 (** **** Exercise: 2 stars, optional (evenb_S)  *)
 (** One inconvenient aspect of our definition of [evenb n] is the
