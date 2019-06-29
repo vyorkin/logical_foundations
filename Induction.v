@@ -179,7 +179,6 @@ Proof.
   induction m as [|m' IHm'].
   -
     rewrite <- plus_n_O. (* n = n + 0 *)
-    rewrite -> plus_O_n. (* 0 + n = n *)
     reflexivity.
   -
     rewrite <- plus_n_Sm. (* S (n + m) = n + (S m) *)
@@ -239,8 +238,13 @@ Proof.
 Theorem evenb_S : forall n : nat,
   evenb (S n) = negb (evenb n).
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  induction n as [|n' IHn'].
+  - reflexivity.
+  -
+    rewrite -> IHn'.
+    rewrite -> negb_involutive.
+    reflexivity.
+Qed.
 
 (** **** Exercise: 1 star (destruct_induction)  *)
 (** Briefly explain the difference between the tactics [destruct]
@@ -272,6 +276,7 @@ Theorem mult_0_plus' : forall n m : nat,
   (0 + n) * m = n * m.
 Proof.
   intros n m.
+  (* assert (0 + n = n) as H. { reflexivity. } *)
   assert (H: 0 + n = n). { reflexivity. }
   rewrite -> H.
   reflexivity.  Qed.
@@ -447,13 +452,51 @@ Proof.
 (** Translate your solution for [plus_comm] into an informal proof:
 
     Theorem: Addition is commutative.
+      For any [n] and [m],
+      n + m = m + n.
+    Proof: By induction on [m].
+    - First, suppose [m = 0]. We must show
+        n + 0 = 0 + n.
+      Which could be simplified to
+        n + 0 = n.
+      From the `plus_n_O` we know that
+        n = n + 0.
+      So we can rewrite
+        n + 0 = n.
+      as
+        n = n.
+    - Next, suppose [m = S m'], where
+        n + m' = m' + n.
+      We must show
+        n + (S m') = (S m') + n.
+      From the `plus_n_Sm` theorem we know that
+        S (n + m) = n + (S m).
+      Lets rewrite our equation accordingly
+        S (n + m') = (S m') + n.
+      Then we can simplify that to just
+        S (n + m') = S (m' + n)
+      This follows directly from the definition of [+].
+      Finally, lets use our hypothesis n + m' = m' + n:
+        S (m' + n) = S (m' + n)
+      Qed.
 
-    Proof: (* FILL IN HERE *)
 *)
 
 (* Do not modify the following line: *)
 Definition manual_grade_for_plus_comm_informal : option (prod nat string) := None.
 (** [] *)
+
+
+Theorem beq_nat_n_n: forall n: nat,
+  true = beq_nat n n.
+Proof.
+  induction n as [| n' IHn'].
+  - reflexivity.
+  -
+    simpl.
+    rewrite <- IHn'.
+    reflexivity.
+Qed.
 
 (** **** Exercise: 2 stars, optional (beq_nat_refl_informal)  *)
 (** Write an informal proof of the following theorem, using the
@@ -461,8 +504,19 @@ Definition manual_grade_for_plus_comm_informal : option (prod nat string) := Non
     paraphrase the Coq tactics into English!
 
     Theorem: [true = beq_nat n n] for any [n].
+    Proof:
+      By induction on [n].
+    - First, suppose [n = 0]. We must show
+        true = beq_nat 0 0.
+      But this follows directly from the definition of [beq_nat].
+    - Next, suppose [n = S n'], where
+        true = beq_nat n' n'.
+      We must show
+        true = beq_nat (S n') (S n').
+      Using the definition of [beq_nat] this could be reduced to:
+        true = beq_nat n' n'.
+      Qed.
 
-    Proof: (* FILL IN HERE *)
 *)
 (** [] *)
 
@@ -476,27 +530,72 @@ Definition manual_grade_for_plus_comm_informal : option (prod nat string) := Non
 Theorem plus_swap : forall n m p : nat,
   n + (m + p) = m + (n + p).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m p.
+  rewrite -> plus_comm.
+  assert (H: p + n = n + p). { rewrite <- plus_comm. reflexivity. }
+  rewrite <- H.
+  rewrite <- plus_assoc.
+  reflexivity.
+Qed.
 
 (** Now prove commutativity of multiplication.  (You will probably
     need to define and prove a separate subsidiary theorem to be used
     in the proof of this one.  You may find that [plus_swap] comes in
     handy.) *)
 
+(*  x * (y + z) = x * y + x * z  *)
+(*  (y + z) * x = y * x + z * x  *)
+
+Lemma mult_distr_l : forall x y z: nat,
+  x * (y + z) = x * y + x * z.
+Proof.
+  induction x as [| x' IHx'].
+  - reflexivity.
+  -
+    simpl.
+    intros y z.
+    rewrite -> plus_assoc.
+    rewrite -> IHx'.
+    rewrite -> plus_swap.
+    rewrite -> plus_assoc.
+    rewrite -> plus_swap.
+    rewrite -> plus_assoc.
+    reflexivity.
+Qed.
+
+Lemma mult_1_r: forall n:nat,
+  n * 1 = n.
+Proof.
+  induction n as [| n' IHn'].
+  - reflexivity.
+  - simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
 Theorem mult_comm : forall m n : nat,
   m * n = n * m.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  induction n as [| n' IHn'].
+  -
+    rewrite -> mult_0_r.
+    reflexivity.
+  -
+    simpl.
+    rewrite <- IHn'.
+    assert (H1: m * S n' = m * (1 + n')). { reflexivity. }
+    rewrite -> H1.
+    rewrite -> mult_distr_l.
+    rewrite -> mult_1_r.
+    reflexivity.
+Qed.
 
 (** **** Exercise: 3 stars, optional (more_exercises)  *)
-(** Take a piece of paper.  For each of the following theorems, first
-    _think_ about whether (a) it can be proved using only
+(** Take a piece of paper. For each of the following theorems,
+    first _think_ about whether (a) it can be proved using only
     simplification and rewriting, (b) it also requires case
-    analysis ([destruct]), or (c) it also requires induction.  Write
-    down your prediction.  Then fill in the proof.  (There is no need
-    to turn in your piece of paper; this is just to encourage you to
-    reflect before you hack!) *)
+    analysis ([destruct]), or (c) it also requires induction.
+    Write down your prediction. Then fill in the proof. (There
+    is no need to turn in your piece of paper; this is just to
+    encourage you to reflect before you hack!) *)
 
 Check leb.
 
