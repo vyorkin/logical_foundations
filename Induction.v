@@ -590,43 +590,79 @@ Qed.
 
 (** **** Exercise: 3 stars, optional (more_exercises)  *)
 (** Take a piece of paper. For each of the following theorems,
-    first _think_ about whether (a) it can be proved using only
-    simplification and rewriting, (b) it also requires case
-    analysis ([destruct]), or (c) it also requires induction.
-    Write down your prediction. Then fill in the proof. (There
-    is no need to turn in your piece of paper; this is just to
-    encourage you to reflect before you hack!) *)
+first _think_ about whether (a) it can be proved using only
+simplification and rewriting, (b) it also requires case analysis
+([destruct]), or (c) it also requires induction. Write down your
+prediction. Then fill in the proof. (There is no need to turn in
+your piece of paper; this is just to encourage you to reflect
+before you hack!) *)
 
 Check leb.
+
+(**
+    - a) simplification & rewriting
+    - b) + destruct (case analysis)
+    - c) + induction
+*)
 
 Theorem leb_refl : forall n:nat,
   true = leb n n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  induction n as [|n' IHn'].
+  - reflexivity.
+  - rewrite -> IHn'. reflexivity.
+Qed.
+(* case analysis? wrong: + induction *)
 
 Theorem zero_nbeq_S : forall n:nat,
   beq_nat 0 (S n) = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros [|n].
+  - reflexivity.
+  - reflexivity.
+Qed.
+(* case analysis? right! *)
 
 Theorem andb_false_r : forall b : bool,
   andb b false = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros b. destruct b.
+  - reflexivity.
+  - reflexivity.
+Qed.
+(* case analysis? right! *)
 
 Theorem plus_ble_compat_l : forall n m p : nat,
   leb n m = true -> leb (p + n) (p + m) = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m p H. destruct p.
+  - simpl. rewrite -> H. reflexivity.
+  -
+    simpl.
+    rewrite <- H.
+    induction p as [|p' IHp'].
+    + reflexivity.
+    + simpl. rewrite -> IHp'. reflexivity.
+Qed.
+(* case analysis? wrong: case analysis + induction *)
 
 Theorem S_nbeq_0 : forall n:nat,
   beq_nat (S n) 0 = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros [|n].
+  - reflexivity.
+  - reflexivity.
+Qed.
+(* case analysis? right! *)
 
-Theorem mult_1_l : forall n:nat, 1 * n = n.
+Theorem mult_1_l : forall n:nat,
+  1 * n = n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n.
+  rewrite -> plus_n_O.
+  reflexivity.
+Qed.
+(* + induction? wrong: simplification & rewriting *)
 
 Theorem all3_spec : forall b c : bool,
     orb
@@ -635,17 +671,58 @@ Theorem all3_spec : forall b c : bool,
                (negb c))
   = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros b c. destruct b.
+  -
+    simpl.
+    destruct c.
+    + reflexivity.
+    + reflexivity.
+  -
+    reflexivity.
+Qed.
+(* simplification & rewriting? wrong: case analysis *)
 
 Theorem mult_plus_distr_r : forall n m p : nat,
   (n + m) * p = (n * p) + (m * p).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m p.
+  destruct p.
+  -
+    rewrite -> mult_0_r.
+    rewrite -> mult_comm.
+    rewrite -> mult_0_l.
+    rewrite -> plus_O_n.
+    rewrite -> mult_0_r.
+    reflexivity.
+  -
+    rewrite -> mult_comm.
+    rewrite -> mult_distr_l.
+    rewrite -> mult_comm.
+    assert (H: m * S p = S p * m).
+    { rewrite -> mult_comm. reflexivity. }
+    rewrite -> H.
+    reflexivity.
+Qed.
+(* simplification & rewriting? wrong: + case analysis *)
 
 Theorem mult_assoc : forall n m p : nat,
   n * (m * p) = (n * m) * p.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros m n p.
+  induction m as [|m' IHm'].
+  - simpl. reflexivity.
+  -
+    simpl.
+    rewrite -> IHm'.
+    rewrite -> mult_comm.
+    assert (H: m' * n * p = p * (m' * n)).
+    { rewrite -> mult_comm. reflexivity. }
+    rewrite -> H.
+    rewrite <- mult_distr_l.
+    rewrite -> mult_comm.
+    reflexivity.
+Qed.
+(* simplification & rewriting? wrong: + induction *)
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (beq_nat_refl)  *)
@@ -658,7 +735,10 @@ Proof.
 Theorem beq_nat_refl : forall n : nat,
   true = beq_nat n n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n.
+  rewrite <- beq_nat_n_n.
+  reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (plus_swap')  *)
@@ -674,7 +754,14 @@ Proof.
 Theorem plus_swap' : forall n m p : nat,
   n + (m + p) = m + (n + p).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m p.
+  rewrite -> plus_comm.
+  replace (n + p) with (p + n).
+  rewrite <- plus_assoc.
+  reflexivity.
+  rewrite -> plus_comm.
+  reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, recommended (binary_commute)  *)

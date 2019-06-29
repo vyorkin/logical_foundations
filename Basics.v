@@ -1141,8 +1141,8 @@ Theorem zero_nbeq_plus_1 :
     beq_nat 0 (n + 1) = false.
 Proof.
   intros [|n].
-  - reflexivity.
-  - reflexivity.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
 Qed.
 (** [] *)
 
