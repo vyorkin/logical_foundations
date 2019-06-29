@@ -609,7 +609,7 @@ Fixpoint exp (base power : nat) : nat :=
   end.
 
 Compute (exp 2 4).
-Example test_exp1: (exp 2 3) = 8.
+(* Example test_exp1: (exp 2 3) = 8. *)
 
 (** **** Exercise: 1 star (factorial)  *)
 (** Recall the standard mathematical factorial function:
@@ -842,7 +842,8 @@ Proof.
   intros H.
   (* rewrite the goal using the hypothesis: *)
   rewrite -> H.
-  reflexivity.  Qed.
+  reflexivity.
+Qed.
 
 (** The first line of the proof moves the universally quantified
     variables [n] and [m] into the context.  The second moves the
@@ -871,7 +872,8 @@ Proof.
   rewrite -> H1.
   rewrite <- H2.
   (* rewrite -> H1, -> H2. *)
-  reflexivity. Qed.
+  reflexivity.
+Qed.
 (** [] *)
 
 (** The [Admitted] command tells Coq that we want to skip trying
