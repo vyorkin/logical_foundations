@@ -132,7 +132,7 @@ Example test_next_weekday:
     later.  Having made the assertion, we can also ask Coq to verify
     it, like this: *)
 
-Proof. simpl. reflexivity.  Qed.
+Proof. simpl. reflexivity. Qed.
 
 (** The details are not important for now (we'll come back to
     them in a bit), but essentially this can be read as "The assertion
@@ -481,6 +481,9 @@ End NatPlayground.
     the "unary" notation defined by the constructors [S] and [O].  Coq
     prints numbers in arabic form by default: *)
 
+Check O.
+Check (S O).
+Check (S (S O)).
 Check (S (S (S (S O)))).
   (* ===> 4 : nat *)
 
@@ -527,6 +530,10 @@ Fixpoint evenb (n:nat) : bool :=
   | S O      => false
   | S (S n') => evenb n'
   end.
+
+(* fib 0 = 1 *)
+(* fib 1 = 1 *)
+(* fib 2 = fib 1 + fib 0 *)
 
 (** We can define [oddb] by a similar [Fixpoint] declaration, but here
     is a simpler definition: *)
