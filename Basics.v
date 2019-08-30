@@ -868,7 +868,7 @@ Qed.
 (** **** Exercise: 1 star (plus_id_exercise)  *)
 (** Remove "[Admitted.]" and fill in the proof. *)
 
-Theorem plus_id_excercise :
+Theorem plus_id_exercise :
   forall n m o : nat,
     n = m ->
     m = o ->
