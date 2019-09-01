@@ -905,7 +905,7 @@ Proof. reflexivity. Qed.
     situation where it would be useful for [X] and [Y] to be
     different? *)
 
-(* FILL IN HERE *)
+(* sure: fold plus l 0 *)
 
 (* Do not modify the following line: *)
 Definition manual_grade_for_fold_types_different : option (prod nat string) := None.
@@ -979,18 +979,30 @@ Proof. reflexivity. Qed.
 Theorem fold_length_correct : forall X (l : list X),
   fold_length l = length l.
 Proof.
-(* FILL IN HERE *) Admitted.
+  intros X l.
+  induction l as [|n l' IHl'].
+  - reflexivity.
+  - simpl. rewrite <- IHl'. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars (fold_map)  *)
 (** We can also define [map] in terms of [fold].  Finish [fold_map]
     below. *)
 
-Definition fold_map {X Y: Type} (f: X -> Y) (l: list X) : list Y
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Definition fold_map {X Y: Type} (f: X -> Y) (l: list X) : list Y :=
+  fold (fun x xs => f x :: xs) l nil.
 
 (** Write down a theorem [fold_map_correct] in Coq stating that
    [fold_map] is correct, and prove it. *)
+
+Theorem fold_map_correct : forall X Y (f : X -> Y) (l : list X),
+  fold_map f l = map f l.
+Proof.
+  induction l as [|n l' IHl'].
+  - reflexivity.
+  - simpl. rewrite <- IHl'. reflexivity.
+Qed.
 
 (* FILL IN HERE *)
 
@@ -999,16 +1011,16 @@ Definition manual_grade_for_fold_map : option (prod nat string) := None.
 (** [] *)
 
 (** **** Exercise: 2 stars, advanced (currying)  *)
-(** In Coq, a function [f : A -> B -> C] really has the type [A
-    -> (B -> C)].  That is, if you give [f] a value of type [A], it
+(** In Coq, a function [f : A -> B -> C] really has the type
+    [A -> (B -> C)].  That is, if you give [f] a value of type [A], it
     will give you function [f' : B -> C].  If you then give [f'] a
     value of type [B], it will return a value of type [C].  This
     allows for partial application, as in [plus3].  Processing a list
     of arguments with functions that return functions is called
     _currying_, in honor of the logician Haskell Curry.
 
-    Conversely, we can reinterpret the type [A -> B -> C] as [(A *
-    B) -> C].  This is called _uncurrying_.  With an uncurried binary
+    Conversely, we can reinterpret the type [A -> B -> C] as
+    [(A * B) -> C].  This is called _uncurrying_.  With an uncurried binary
     function, both arguments must be given at once as a pair; there is
     no partial application. *)
 
@@ -1021,8 +1033,7 @@ Definition prod_curry {X Y Z : Type}
     the theorems below to show that the two are inverses. *)
 
 Definition prod_uncurry {X Y Z : Type}
-  (f : X -> Y -> Z) (p : X * Y) : Z
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+  (f : X -> Y -> Z) (p : X * Y) : Z := f (fst p) (snd p).
 
 (** As a (trivial) example of the usefulness of currying, we can use it
     to shorten one of the examples that we saw above: *)
@@ -1036,18 +1047,15 @@ Proof. reflexivity.  Qed.
 Check @prod_curry.
 Check @prod_uncurry.
 
-Theorem uncurry_curry : forall (X Y Z : Type)
-                        (f : X -> Y -> Z)
-                        x y,
+Theorem uncurry_curry : forall (X Y Z : Type) (f : X -> Y -> Z) x y,
   prod_curry (prod_uncurry f) x y = f x y.
-Proof.
-  (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
-Theorem curry_uncurry : forall (X Y Z : Type)
-                        (f : (X * Y) -> Z) (p : X * Y),
+Theorem curry_uncurry : forall (X Y Z : Type) (f : (X * Y) -> Z) (p : X * Y),
   prod_uncurry (prod_curry f) p = f p.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  destruct p. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, advanced (nth_error_informal)  *)
@@ -1063,7 +1071,12 @@ Proof.
 
    forall X n l, length l = n -> @nth_error X l n = None
 *)
-(* FILL IN HERE *)
+
+(* we have the following hypothesis:
+   length l = n
+   it means that we want to get the "next after the last element"
+   and we will never get past the (n - 1) element, which is
+   directly follows from the definition of [length] and [nth_error] *)
 
 (* Do not modify the following line: *)
 Definition manual_grade_for_informal_proof : option (prod nat string) := None.
@@ -1110,46 +1123,47 @@ Definition three : nat := @doit3times.
 
 (** Successor of a natural number: *)
 
-Definition succ (n : nat) : nat
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Definition succ (n : nat) : nat :=
+  fun (X : Type) (f : X -> X) (x : X) => n _ f (f x).
 
 Example succ_1 : succ zero = one.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 Example succ_2 : succ one = two.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 Example succ_3 : succ two = three.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 (** Addition of two natural numbers: *)
 
-Definition plus (n m : nat) : nat
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Definition plus (n m : nat) : nat :=
+  fun (X : Type) (f : X -> X) (x : X) => m _ f (n _ f x).
 
 Example plus_1 : plus zero one = one.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 Example plus_2 : plus two three = plus three two.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 Example plus_3 :
   plus (plus two two) three = plus one (plus three three).
-Proof. (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 (** Multiplication: *)
 
-Definition mult (n m : nat) : nat
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Definition mult (n m : nat) : nat :=
+  fun (X : Type) (f : X -> X) (x : X) =>
+    n _ (m _ f) x.
 
 Example mult_1 : mult one one = one.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 Example mult_2 : mult zero (plus three three) = zero.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 Example mult_3 : mult two three = plus three three.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 (** Exponentiation: *)
 
@@ -1158,17 +1172,22 @@ Proof. (* FILL IN HERE *) Admitted.
     a "Universe inconsistency" error, try iterating over a different
     type: [nat] itself is usually problematic.) *)
 
-Definition exp (n m : nat) : nat
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Definition exp (n m : nat) : nat :=
+  fun (X : Type) (f : X -> X) (x : X) =>
+    (m _ (n _)) f x.
+
+Compute (exp two two).
+Compute (exp three two).
+Compute (plus (mult two (mult two two)) one).
 
 Example exp_1 : exp two two = plus two two.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 Example exp_2 : exp three two = plus (mult two (mult two two)) one.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 Example exp_3 : exp three zero = one.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 End Church.
 
